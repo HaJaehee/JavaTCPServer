@@ -1,62 +1,44 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
  
-public class TCPServer implements Runnable{
- 
-	private ServerSocket server = null;
- 
-	public TCPServer(int port) {
+public class TCPServer {
+	public static void main(String[] args) {	
+		
+		int port = 10001;
+		ServerSocket server;
 		try {
-			System.out.println("server port : "+port);
 			server = new ServerSocket(port);
-		} catch (IOException e) {
-			System.err.println("Server Socket Open error..............!!");
-			System.err.println(port+" 포트는 이미 사용중 입니다.");
-			System.exit(1); // 종료
-		}
-	}
- 
-	@Override
-	public void run() {
- 
-		while (true) {
-			try {
-				Socket socket = server.accept();
-				System.out.println("From: "+socket.getInetAddress());
-
-				OutputStream out = socket.getOutputStream();
- 
+			while (true) {
+				Socket sock = server.accept();
+				System.out.println("From: "+sock.getInetAddress());
 
 				BufferedReader in = new BufferedReader(new InputStreamReader(
-						socket.getInputStream()));
-				String line = in.readLine();
-				System.out.println("Data : " + line);
+						sock.getInputStream(),Charset.forName("UTF-8")));
+				
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+						sock.getOutputStream(),Charset.forName("UTF-8")));
+				
+				String inputLine = in.readLine();
+				System.out.println("Data : " + inputLine);
  
-				out.write("OK \n".getBytes());
+				out.write("OK \n");
 				out.flush();
  
 				out.close();
 				in.close();
-				socket.close();
- 
-			} catch (Exception e) {
-				System.err.println(e);
-			}			
- 
-		}
-	}
- 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
- 
-		Thread server = new Thread(new TCPServer(10000));
-		server.start();
+				sock.close();
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}			
+
 	}
  
 }
